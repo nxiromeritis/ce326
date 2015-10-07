@@ -3,7 +3,9 @@
 
 extern volatile unsigned int in_pos;
 extern volatile unsigned int out_pos;
-extern volatile unsigned int len;
+extern volatile unsigned int n;
+extern volatile unsigned int bytes_written;
+extern volatile unsigned short is_opened;
 extern volatile char *dstorage;
 
 extern void pipe_init();
