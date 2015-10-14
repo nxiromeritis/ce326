@@ -59,6 +59,7 @@ int main(int argc, char *argv[]) {
 	printf("Characters to send: %s\n\n", c);
 
 
+	pipe_init(pipe_size);
 
 	// create thread
 	if (pthread_create(&thread1, NULL, pthread_reader, &c)) {
@@ -67,7 +68,6 @@ int main(int argc, char *argv[]) {
 	printf("main: thread created\n");
 
 	//pipe init might be dangerous here..thread might find pipe closed and exit
-	pipe_init(pipe_size);
 	for (i=0; i<bytes; i++) {
 		pipe_write(c[i]);
 		//printf("main: wrote %c\n", c[i]);
@@ -75,7 +75,10 @@ int main(int argc, char *argv[]) {
 	}
 
 
-	sleep(1);
+	/*sleep(1);*/
+
+	// pipe_close is called after pipe_writte calls and will block until all
+	// bytes are read
 	pipe_close();
 	free(c);
 

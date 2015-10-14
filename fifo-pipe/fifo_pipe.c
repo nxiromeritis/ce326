@@ -54,8 +54,12 @@ void pipe_write(char c) {
 }
 
 
-// mark pipe as closed.
+// wait for all data to be read
+// and mark pipe as closed.
 void pipe_close() {
+
+	while (bytes_written != 0) {}
+
 	is_opened = 0;
 
 	// no volatile qualifier in free's prototype, cast needed
