@@ -129,13 +129,14 @@ volatile int done_paint;	// counts jobs that are already painted
 int maxIterations;			// we could pass that as thread parameter for no global
 
 void *pthread_work(void *arg) {
-	int i=0;
+	int i;
 
 
 	i = *((int *)arg);	//read arg
 
 	while(1) {
 		while(!(notify && (work_status[i]==0))) {}	// wait for main
+		/*sleep(rand()%5+1);*/
 		mandel_Calc(&slices[i],maxIterations,&res[i*slices[i].imSteps*slices[i].reSteps]);
 		printf("\nthread %d: done\n", i);
 		work_status[i] = 1; // mark as done but not painted
@@ -197,6 +198,7 @@ int main(int argc, char *argv[]) {
 	  tmp[i] = i;
 	  if(pthread_create(&worker[i], NULL, pthread_work, &tmp[i])) {
 		  perror("pthread_create");
+		  exit(1);
 	  }
   }
 
@@ -213,7 +215,7 @@ int main(int argc, char *argv[]) {
 
     mandel_Slice(&pars,nofslices,slices);
 
-    y=0;
+    /*y=0;*/
 
 	// create new jobs
 	done_paint = 0;
@@ -225,18 +227,17 @@ int main(int argc, char *argv[]) {
 	notify = 1;
 
 	// loop until all jobs are done AND painted
+	i = 0;
 	while (done_paint != nofslices) {
-	  i=0;
 	  // stop at the first done and not painted work
 	  while(work_status[i]!=1) {
 		 i = (i+1)%nofslices;
 	  }
 	  work_status[i] = 2;
 	  done_paint++;
-	  /*printf("slice paint: %d total: %d\n",i, done_paint);*/
-
 
 	  //draw
+	  y = i*slices[i].imSteps;
       for (j=0; j<slices[i].imSteps; j++) {
 		for (x=0; x<slices[i].reSteps; x++) {
           setColor(pickColor(res[y*slices[i].reSteps+x],maxIterations));
@@ -245,6 +246,7 @@ int main(int argc, char *argv[]) {
         y++;
       }
 
+	printf("slice paint: %d total: %d\n",i, done_paint);
 	}
 	notify = 0; // all jobs are done
 
